@@ -1,0 +1,88 @@
+&ACCESS RVP
+&REL 41
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = KRC:\R1\Program
+DEF test( )
+;FOLD INI;%{PE}
+decl frame ready_p
+decl frame stack_p
+decl int a,b,x
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+a=0
+b=0
+;ENDFOLD (INI)
+;FOLD PTP P3 Vel=100 % PDAT3 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:P3, 3:, 5:100, 7:PDAT3
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT3
+FDAT_ACT=FP3
+BAS(#PTP_PARAMS,100)
+PTP XP3 
+;ENDFOLD
+if false then
+;FOLD PTP maduo Vel=100 % PDAT4 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:maduo, 3:, 5:100, 7:PDAT4
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT4
+FDAT_ACT=Fmaduo
+BAS(#PTP_PARAMS,100)
+PTP Xmaduo 
+;ENDFOLD
+endif
+loop
+;FOLD PTP pick_up Vel=100 % PDAT5 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:pick_up, 3:, 5:100, 7:PDAT5
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT5
+FDAT_ACT=Fpick_up
+BAS(#PTP_PARAMS,100)
+PTP Xpick_up 
+;ENDFOLD
+a=a+1
+if a>2 then
+b=b+1
+endif
+;fold ready_p
+ready_p=Xmaduo
+ready_p.X=ready_p.x+40*a
+ready_p.y=ready_p.y+40*b
+ready_p.z=ready_p.z+50
+$base=base_data[1]
+for x=1 to 6
+$vel_axis[x]=85
+$acc_axis[x]=85
+endfor
+$apo.cptp=5
+ptp ready_p c_dis
+;endfold
+;fold stack_p
+stack_p=Xmaduo
+stack_p.X=stack_p.x+40*a
+stack_p.y=stack_p.y+40*b
+$base=base_data[1]
+for x=1 to 6
+$vel_axis[x]=85
+$acc_axis[x]=85
+endfor
+$apo.cptp=5
+ptp stack_p c_dis
+;endfold
+if b>2 then
+a=0,b=0
+exit
+endif
+endloop
+;FOLD PTP test Vel=100 % PDAT13 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:test, 3:, 5:100, 7:PDAT13
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT13
+FDAT_ACT=Ftest
+BAS(#PTP_PARAMS,100)
+PTP Xtest 
+;ENDFOLD
+end

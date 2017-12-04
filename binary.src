@@ -1,0 +1,58 @@
+&ACCESS RVP
+&REL 30
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+DEF binary( )
+;FOLD Declaration
+  INT i
+  DECL EKI_STATUS RET
+  CHAR Bytes[64]
+;ENDFOLD (Declaration)
+decl int ii
+decl int jk
+decl char cc[64]
+;FOLD INI 
+  ;FOLD BASISTECH INI   
+  BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+jk=0
+for jk=1 to 64
+cc[jk]=0
+endfor
+ii=0
+;FOLD Initialize sample data
+ FOR i=(1) TO (64)  
+  Bytes[i]=0
+ ENDFOR   
+;ENDFOLD (Initialize sample data)
+
+RET=EKI_Init("BinaryStream")
+RET=EKI_Open("BinaryStream")
+;RET=EKI_Clear("BinaryStream")
+Bytes[]="Stream ends with CR,LF"
+;loop
+;endloop
+RET = EKI_Send("BinaryStream",Bytes[])
+
+WAIT FOR $FLAG[1]
+;wait sec 0.8
+;repeat
+RET=EKI_GetString("BinaryStream","Buffer",Bytes[])
+;RET=EKI_GetString("BinaryStream","Buffer",cc[])
+;until (RET.buff<1)
+;loop
+ii=ii+1
+;endloop
+;$FLAG[1]=FALSE
+
+RET=EKI_Close("BinaryStream")
+RET=EKI_Clear("BinaryStream")
+loop
+ii=ii+1
+endloop
+END

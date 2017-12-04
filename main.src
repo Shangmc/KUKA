@@ -1,0 +1,141 @@
+&ACCESS RVP
+&REL 135
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = KRC:\R1\Program
+DEF main( )
+;fold FRAME
+DECL FRAME READY_POS
+DECL FRAME stack_POS
+DECL FRAME up_pos
+DECL FRAME stack_end
+DECL FRAME rotation_pos
+DECL INT X
+;endfold
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+if false then
+;FOLD PTP maduo Vel=100 % PDAT1 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:maduo, 3:, 5:100, 7:PDAT1
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT1
+FDAT_ACT=Fmaduo
+BAS(#PTP_PARAMS,100)
+PTP Xmaduo 
+;ENDFOLD
+endif
+loop
+continue
+$advance=3
+;FOLD USER INI
+$out[2]=FALSE
+$OUT[3]=false
+$OUT[4]=false
+;ENDFOLD
+$advance=3
+;PTP Pick_Up
+;FOLD PTP pick_up CONT Vel=100 % PDAT3 Tool[1]:test Base[1]:tesy;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:pick_up, 3:C_DIS, 5:100, 7:PDAT3
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT3
+FDAT_ACT=Fpick_up
+BAS(#PTP_PARAMS,100)
+PTP Xpick_up C_DIS
+;ENDFOLD
+continue
+;wait for $in[1] and $in[2] AND $aut ;wait allow Pick
+wait sec 0
+$ov_pro=100
+$advance=3
+;PTP pick_Up
+$out[3]=true
+calculation()
+CONTINUE
+;start rotation
+;START TO MADUO
+;START
+;fold READY_POS
+READY_POS=Xmaduo
+ready_POS.X=ready_pos.X+P_POSITION[num,tier].X
+ready_pos.y=ready_pos.y+P_POSITION[num,tier].y
+READY_POS.Z=READY_POS.Z+RH
+$BASE=BASE_DATA[1]
+FOR X=1 TO 6
+$VEL_AXIS[X]=85
+$ACC_AXIS[X]=85
+ENDFOR
+$APO.CPTP=5
+ptp READY_POS C_DIS
+;endfold
+; stack start
+;FOLD STACK_POS
+stack_POS=Xmaduo
+stack_POS.X=stack_POS.X+P_POSITION[num,tier].X
+stack_POS.y=stack_POS.y+P_POSITION[num,tier].y
+$BASE=BASE_DATA[1]
+FOR X=1 TO 6
+$VEL_AXIS[X]=85
+$ACC_AXIS[X]=85
+ENDFOR
+$APO.CPTP=5
+ptp stack_POS C_DIS
+;ENDFOLD
+$OUT[2]=FALSE
+$OUT[4]=true  
+wait sec 1
+;fold READY_POS
+READY_POS=Xmaduo
+ready_pos.X=ready_pos.X+P_POSITION[num,tier].X
+ready_pos.y=ready_pos.y+P_POSITION[num,tier].y
+READY_POS.Z=READY_POS.Z+RH
+$BASE=BASE_DATA[1]
+FOR X=1 TO 6
+$VEL_AXIS[X]=85
+$ACC_AXIS[X]=85
+ENDFOR
+$APO.CPTP=5
+ptp READY_POS C_DIS
+;endfold
+$advance=3
+;STACK END
+$out[3]=false
+$out[4]=false
+$ov_pro=100
+;FOLD COUNT
+Tier=Tier+1
+if Tier>3 then 
+   NUM=Num+1
+tier=1
+
+endif
+if num>4 then
+num=1
+exit
+endif
+
+;ENDFOLD
+endloop
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}%R 8.3.44,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART=FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS(#PTP_PARAMS,100)
+$H_POS=XHOME
+PTP XHOME 
+;ENDFOLD
+END
